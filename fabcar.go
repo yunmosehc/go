@@ -23,16 +23,16 @@ import (
 )
 
 //********************CS系统部分*************************
-var carStr string = ""
-
-type HomeController struct {
-        beego.Controller
-}
-
-func (this *HomeController) Get() {
-        this.Data["carString"] = carStr
-		this.TplName = "allCar.html"
-}
+//var carStr string = ""
+//
+//type HomeController struct {
+//        beego.Controller
+//}
+//
+//func (this *HomeController) Get() {
+//        this.Data["carString"] = carStr
+//		this.TplName = "allCar.html"
+//}
 
 // ShowPrePage 实现上一页
 func ShowPrePage(pi int) (pre string) {
@@ -130,11 +130,11 @@ func main() {
 		fmt.Printf("Failed to evaluate transaction: %s\n", err)
 		os.Exit(1)
 	}
-	carStr = string(result)
+	//carStr = string(result)
 	fmt.Println(string(result))
 
 	//********************CS系统部分*************************
-	beego.Router("/",&HomeController{})
+	//beego.Router("/",&HomeController{})
 	//映射视图函数,必须放在run函数前
 	_ = beego.AddFuncMap("PrePage", ShowPrePage)
 	_ = beego.AddFuncMap("NextPage", ShowNextPage)
