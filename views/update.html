@@ -1,0 +1,61 @@
+{{ template "layout.html" . }}
+
+{{define "title"}}
+    <title>转让产权</title>
+{{end}}
+{{define "main_body"}}
+    <div class="main_body" id="main_body">
+        <div class="breadcrub">
+            当前位置：<a href="/index">文章管理</a>>转让产权
+        </div>
+        <div class="pannel">
+            <form method="post" action="/article/update" enctype="multipart/form-data">
+            <h3 class="review_title">转让产权</h3>
+{{/*                <h5 style="margin-top: 10px;text-align: center;color: #ff0000">{{if .code}}*/}}
+{{/*           {{.code}}*/}}
+{{/*                {{end}}</h5>*/}}
+            <div class="form_group">
+                <label>文章编号：</label>
+                <input type="text" class="input_txt2" name="artid">
+            </div>
+{{/*            <div class="form_group">*/}}
+{{/*                <label>文章类型：</label>*/}}
+{{/*                <select class="sel_opt" name="select">*/}}
+{{/*                    {{range .types}}*/}}
+{{/*                    <option>{{.TypeName}}</option>*/}}
+{{/*                    {{end}}*/}}
+{{/*                    <option selected="true">{{.article.ArtType.TypeName}}</option>*/}}
+{{/*                </select>*/}}
+{{/*            </div>*/}}
+
+{{/*            <div class="form_group">*/}}
+{{/*                <label>文章内容：</label>*/}}
+{{/*                <textarea class="input_multxt" name="artcontent" style="height: 100px">{{.article.ArtContent}}</textarea>*/}}
+{{/*            </div>*/}}
+{{/*            <div class="form_group">*/}}
+{{/*                <label>上传图片：</label>*/}}
+{{/*                {{if .article.ArtImg}}*/}}
+{{/*                <img style="width: 200px;height: 100px" src="{{.article.ArtImg}}">*/}}
+{{/*                {{end}}*/}}
+{{/*                <input type="file" class="input_file"  name="artfile">*/}}
+{{/*            </div>*/}}
+            <div class="form_group">
+                <label>新产权人编号</label>
+                <input type="text" class="input_txt2" name="accountid">
+            </div>
+            <div class="form_group">
+                <label>新产权人姓名</label>
+                <input type="text" class="input_txt2" name="ownername">
+            </div>
+            <div class="form_group">
+                <label>新产权人身份证号</label>
+                <input type="text" class="input_txt2" name="ownercardnumber">
+            </div>
+            <div class="form_group indent_group line_top">
+                <input type="submit" value="转 让" class="confirm">
+                <span>{{.errmsg}}</span>
+            </div>
+        </form>            
+        </div>    
+</div>
+{{end}}

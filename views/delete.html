@@ -1,0 +1,36 @@
+{{ template "layout.html" . }}
+
+{{define "title"}}
+    <title>删除产权</title>
+{{end}}
+{{define "main_body"}}
+    <div class="main_body" id="main_body">
+        <div class="breadcrub">
+            当前位置：<a href="/index">文章管理</a>>删除产权
+        </div>
+        <div class="pannel">
+            <form method="post" action="/article/delete" enctype="multipart/form-data">
+                <h3 class="review_title">删除产权</h3>
+                <div class="form_group">
+                    <label>文章编号：</label>
+                    <input type="text" class="input_txt2" name="artid" >
+                </div>
+                <div class="form_group">
+                    <label>产权人姓名</label>
+                    <input type="text" class="input_txt2" name="ownername">
+                </div>
+                <div class="form_group">
+                    <label>产权人身份证号</label>
+                    <input type="text" class="input_txt2" name="ownercardnumber">
+                </div>
+                <div class="form_group">
+                    <input type="hidden" class="input_txt2" name="accountid" value="{{.accountid}}">
+                </div>
+                <div class="form_group indent_group line_top">
+                    <input type="submit" value="删 除" class="confirm">
+                    <span>{{.errMsg}}</span>
+                </div>
+            </form>
+        </div>    
+    </div>
+{{end}}
