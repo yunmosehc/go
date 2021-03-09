@@ -49,6 +49,8 @@ func (a *ArticleController) ShowIndex() {
 	accountid, err2 := strconv.Atoi(accountId)
 	if err2 != nil {
 	}
+	beego.Info("当前登录账户编号是：")
+	beego.Info(accountid)
 
 	querySeter = querySeter.Filter("OwnerAccountId", accountid)
 	/*_,err := querySeter.All(&articles)*/
@@ -67,6 +69,7 @@ func (a *ArticleController) ShowIndex() {
 	_, err = querySeter.Limit(pageSize, stat).RelatedSel().All(&articles)
 	if err != nil {
 		beego.Info("获取文章数据失败")
+		beego.Info(err)
 		a.Redirect("/article/index", 302)
 		return
 	}
