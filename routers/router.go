@@ -22,9 +22,9 @@ func init() {
 	// 文章详情
 	//beego.Router("/article/content", &controllers.ArticleController{}, "get:ShowContent")
 	// 编辑文章
-	beego.Router("/article/update", &controllers.ArticleController{}, "get:ShowUpdate;post:Update")
+	beego.Router("/article/update", &controllers.ArticleController{}, "get:ShowUpdate;post:HandleUpdate")
 	// 删除文章
-	beego.Router("/article/delete", &controllers.ArticleController{}, "get:Delete;post:HandleDelete")
+	beego.Router("/article/delete", &controllers.ArticleController{}, "get:ShowDelete;post:HandleDelete")
 	// 文章类型
 	//beego.Router("/article/addType", &controllers.ArticleController{}, "get:ShowArtType;post:AddType")
 	// 退出

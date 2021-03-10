@@ -119,6 +119,8 @@ func (u *UserController) HandleLogin() {
 	u.SetSession("accountid", user.AccountId)
 
 	// 5.跳转指定界面
+	beego.Info("when login, accountid is :")
+	beego.Info(user.AccountId)
 	u.Redirect("/article/index?accountid="+strconv.Itoa(user.AccountId), 302)
 }
 

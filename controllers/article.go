@@ -221,7 +221,8 @@ func (a *ArticleController) HandleAdd() {
 		return
 	}
 	// 5.跳转页面（index.html）
-	a.Redirect("/article/index", 302)
+	//a.Redirect("/article/index", 302)
+	a.Redirect("/article/index?accountid="+a.GetString("accountid"), 302)
 	//a.TplName = "index.html"
 }
 
@@ -279,10 +280,10 @@ func (a *ArticleController) ShowUpdate() {
 }
 
 // Edit 编辑文章业务处理
-func (a *ArticleController) Update() {
+func (a *ArticleController) HandleUpdate() {
 	// 1.获取页面数据
 	artId := a.GetString("artid")
-	owneraccountId := a.GetString("accountid")
+	owneraccountId := a.GetString("newaccountid")
 	ownername := a.GetString("ownername")
 	ownercardnumber := a.GetString("ownercardnumber")
 	//string转int
@@ -322,7 +323,9 @@ func (a *ArticleController) Update() {
 	var err1 error
 	_, err1 = o.Update(&art_new)
 	if err1 == nil {
-		a.Redirect("/article/index", 302)
+		beego.Info("when update,accountid is:")
+		beego.Info("/article/index?accountid="+a.GetString("accountid"))
+		a.Redirect("/article/index?accountid="+a.GetString("accountid"), 302)
 		return
 	} else {
 		beego.Info("更新数据信息失败")
@@ -332,7 +335,7 @@ func (a *ArticleController) Update() {
 }
 
 //展示删除产权界面
-func (a *ArticleController) Delete() {
+func (a *ArticleController) ShowDelete() {
 	a.Data["username"] = a.GetSession("username")
 	a.Data["accountid"] = a.GetSession("accountid")
 	a.TplName = "delete.html"
@@ -371,11 +374,11 @@ func (a *ArticleController) HandleDelete() {
 	_, err = o.Delete(&article)
 	if err != nil {
 		beego.Info("获取文章信息失败")
-		a.Redirect("/article/index", 302)
+		a.Redirect("/article/index?accountid="+a.GetString("accountid"), 302)
 		return
 	}
 	// 3.跳转列表页
-	a.Redirect("/article/index", 302)
+	a.Redirect("/article/index?accountid="+a.GetString("accountid"), 302)
 }
 
 // ShowArtType 展示文章类型

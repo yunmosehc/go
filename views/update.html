@@ -41,7 +41,7 @@
 {{/*            </div>*/}}
             <div class="form_group">
                 <label>新产权人编号</label>
-                <input type="text" class="input_txt2" name="accountid">
+                <input type="text" class="input_txt2" name="newaccountid">
             </div>
             <div class="form_group">
                 <label>新产权人姓名</label>
@@ -50,6 +50,9 @@
             <div class="form_group">
                 <label>新产权人身份证号</label>
                 <input type="text" class="input_txt2" name="ownercardnumber">
+            </div>
+            <div class="form_group">
+                <input type="hidden" class="input_txt2" name="accountid" value="{{.accountid}}">
             </div>
             <div class="form_group indent_group line_top">
                 <input type="submit" value="转 让" class="confirm">
