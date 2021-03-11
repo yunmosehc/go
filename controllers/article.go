@@ -7,36 +7,14 @@ import (
 	"math"
 	"strconv"
 	"time"
+	_ "fabcar/models"
+	_ "fabcar/routers"
 )
 
 // ArticleController 自定义控制器
 type ArticleController struct {
 	beego.Controller
 }
-
-// SelectType 文章类型查询
-//func (a *ArticleController) SelectType() {
-//	// 1.获取前端传过来的参数
-//	sel := a.GetString("select")
-//	// 2.使用该参数过滤显示数据
-//	if sel == "选择类型" {
-//		a.ShowIndex()
-//	} else {
-//		o := orm.NewOrm()
-//		var articles []models.Article
-//		// RelatedSel("ArticleType")指定关联的表，非惰性查询
-//		qs := o.QueryTable("Article").RelatedSel("ArticleType").Filter("ArticleType__TypeName", sel)
-//		_, err := qs.All(&articles)
-//		if err != nil {
-//			beego.Info("获取信息错误")
-//			a.Redirect("/article/index", 302)
-//			return
-//		}
-//		a.Data["articles"] = articles
-//		// 3.跳转页面
-//		a.ShowIndex()
-//	}
-//}
 
 // ShowIndex 展示首页并实现分页功能
 func (a *ArticleController) ShowIndex() {
@@ -82,28 +60,9 @@ func (a *ArticleController) ShowIndex() {
 	if pageIndex == int(pageCount) {
 		isLastPage = true
 	}
-	// 展示下拉类型
-	//var types []models.ArticleType
-	//_, err = o.QueryTable("ArticleType").All(&types)
-	//if err != nil {
-	//	beego.Info("获取文章类型错误")
-	//	a.Redirect("/article/index", 302)
-	//	return
-	//}
-
-	//a.Data["username"] = a.GetSession("username")
-	//a.Data["types"] = types
-	//a.Data["count"] = count
-	//a.Data["pageCount"] = pageCount
-	//a.Data["pageIndex"] = pageIndex
-	//a.Data["isFirstPage"] = isFirstPage
-	//a.Data["isLastPage"] = isLastPage
-	//a.Data["articles"] = articles
-	//a.TplName = "index.html"
 
 	a.Data["username"] = a.GetSession("username")
 	a.Data["accountid"] = a.GetSession("accountid")
-	//a.Data["types"] = types
 	a.Data["count"] = count
 	a.Data["pageCount"] = pageCount
 	a.Data["pageIndex"] = pageIndex

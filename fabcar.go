@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	_ "fabcar/models"
 	_ "fabcar/routers"
@@ -130,6 +131,26 @@ func main() {
 	}
 	//carStr = string(result)
 	fmt.Println(string(result))
+
+	type Car struct {
+		Title   string `json:"title"`
+		IpfsAddress string `json:"ipfsaddress"`
+		OwnerAccountId string `json:"owneraccountid"`
+		LastOwnerAccountId string `json:"lastowneraccountid"`
+		AcquireDate string `json:"acquiredate"`
+		OwnerName string `json:"ownername"`
+		OwnerCardNumber string `json:"ownercardnumber"`
+	}
+	type QueryResult struct {
+		Key    string `json:"Key"`
+		Record *Car
+	}
+	art := new(Car)
+	_ = json.Unmarshal(result, art)
+	fmt.Println("title--->"+art.Title)
+	fmt.Println("IpfsAddress--->"+art.IpfsAddress)
+	fmt.Println("OwnerAccountId--->"+art.OwnerAccountId)
+	fmt.Println("OwnerCardNumber--->"+art.OwnerCardNumber)
 
 	//********************CS系统部分*************************
 	//beego.Router("/",&HomeController{})
