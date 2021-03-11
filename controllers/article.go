@@ -1,12 +1,19 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fabcar/models"
+	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
-	"math"
+	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
+	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
+	"errors"
 )
 
 // ArticleController 自定义控制器
@@ -16,59 +23,205 @@ type ArticleController struct {
 
 // ShowIndex 展示首页并实现分页功能
 func (a *ArticleController) ShowIndex() {
-	// 1.查询所有文章数据
-	o := orm.NewOrm()
-	var articles []models.Article
-	querySeter := o.QueryTable("Article").RelatedSel()
-	//获取用户的账户编号
-	accountId := a.GetString("accountid")
-	accountid, err2 := strconv.Atoi(accountId)
-	if err2 != nil {
-	}
-	beego.Info("当前登录账户编号是：")
-	beego.Info(accountid)
+	//// 1.查询所有文章数据
+	//o := orm.NewOrm()
+	//var articles []models.Article
+	//querySeter := o.QueryTable("Article").RelatedSel()
+	////获取用户的账户编号
+	//accountId := a.GetString("accountid")
+	//accountid, err2 := strconv.Atoi(accountId)
+	//if err2 != nil {
+	//}
+	//beego.Info("当前登录账户编号是：")
+	//beego.Info(accountid)
+	//
+	//querySeter = querySeter.Filter("OwnerAccountId", accountid)
+	///*_,err := querySeter.All(&articles)*/
+	//count, _ := querySeter.Count()
+	//// 2.设置每一页显示的数量，从而得到总的页数
+	//var pageSize = 5
+	//pageCount := math.Ceil(float64(count) / float64(pageSize)) // 向上取整，显示的页面不会出现小数
+	//// 3.首页和末页
+	//pi := a.GetString("pi")
+	//pageIndex, err := strconv.Atoi(pi)
+	//if err != nil {
+	//	pageIndex = 1 // 首页没有传pageIndex的值，防止默认pageIndex为0
+	//}
+	//// 3.1每一页显示的个数
+	//stat := pageSize * (pageIndex - 1)
+	//_, err = querySeter.Limit(pageSize, stat).RelatedSel().All(&articles)
+	//if err != nil {
+	//	beego.Info("获取文章数据失败")
+	//	beego.Info(err)
+	//	a.Redirect("/article/index", 302)
+	//	return
+	//}
+	//// 4.上一页和下一页限制(视图函数)
+	//var isFirstPage = false
+	//var isLastPage = false
+	//if pageIndex == 1 {
+	//	isFirstPage = true
+	//}
+	//if pageIndex == int(pageCount) {
+	//	isLastPage = true
+	//}
+	//
+	//a.Data["username"] = a.GetSession("username")
+	//a.Data["accountid"] = a.GetSession("accountid")
+	//a.Data["count"] = count
+	//a.Data["pageCount"] = pageCount
+	//a.Data["pageIndex"] = pageIndex
+	//a.Data["isFirstPage"] = isFirstPage
+	//a.Data["isLastPage"] = isLastPage
+	//a.Data["articles"] = articles
+	//a.TplName = "index.html"
 
-	querySeter = querySeter.Filter("OwnerAccountId", accountid)
-	/*_,err := querySeter.All(&articles)*/
-	count, _ := querySeter.Count()
-	// 2.设置每一页显示的数量，从而得到总的页数
-	var pageSize = 5
-	pageCount := math.Ceil(float64(count) / float64(pageSize)) // 向上取整，显示的页面不会出现小数
-	// 3.首页和末页
-	pi := a.GetString("pi")
-	pageIndex, err := strconv.Atoi(pi)
+	//**************fabric部分******************
+	os.Setenv("DISCOVERY_AS_LOCALHOST", "true")
+	wallet, err := gateway.NewFileSystemWallet("wallet")
 	if err != nil {
-		pageIndex = 1 // 首页没有传pageIndex的值，防止默认pageIndex为0
-	}
-	// 3.1每一页显示的个数
-	stat := pageSize * (pageIndex - 1)
-	_, err = querySeter.Limit(pageSize, stat).RelatedSel().All(&articles)
-	if err != nil {
-		beego.Info("获取文章数据失败")
-		beego.Info(err)
-		a.Redirect("/article/index", 302)
-		return
-	}
-	// 4.上一页和下一页限制(视图函数)
-	var isFirstPage = false
-	var isLastPage = false
-	if pageIndex == 1 {
-		isFirstPage = true
-	}
-	if pageIndex == int(pageCount) {
-		isLastPage = true
+		fmt.Printf("Failed to create wallet: %s\n", err)
+		os.Exit(1)
 	}
 
-	a.Data["username"] = a.GetSession("username")
-	a.Data["accountid"] = a.GetSession("accountid")
-	a.Data["count"] = count
-	a.Data["pageCount"] = pageCount
-	a.Data["pageIndex"] = pageIndex
-	a.Data["isFirstPage"] = isFirstPage
-	a.Data["isLastPage"] = isLastPage
-	a.Data["articles"] = articles
-	a.TplName = "index.html"
+	if !wallet.Exists("appUser") {
+		err = populateWallet(wallet)
+		if err != nil {
+			fmt.Printf("Failed to populate wallet contents: %s\n", err)
+			os.Exit(1)
+		}
+	}
+
+	ccpPath := filepath.Join(
+		"..",
+		"..",
+		"test-network",
+		"organizations",
+		"peerOrganizations",
+		"org1.example.com",
+		"connection-org1.yaml",
+	)
+
+	gw, err := gateway.Connect(
+		gateway.WithConfig(config.FromFile(filepath.Clean(ccpPath))),
+		gateway.WithIdentity(wallet, "appUser"),
+	)
+	if err != nil {
+		fmt.Printf("Failed to connect to gateway: %s\n", err)
+		os.Exit(1)
+	}
+	defer gw.Close()
+
+	network, err := gw.GetNetwork("mychannel")
+	if err != nil {
+		fmt.Printf("Failed to get network: %s\n", err)
+		os.Exit(1)
+	}
+
+	contract := network.GetContract("fabcar")
+
+	result, err := contract.EvaluateTransaction("queryAllCars")
+	if err != nil {
+		fmt.Printf("Failed to evaluate transaction: %s\n", err)
+		os.Exit(1)
+	}
+	fmt.Println(string(result))
+
+	result, err = contract.SubmitTransaction("createCar", "CAR2", "联盟链开发实战",
+		"https://ipfs.io/ipfs/QmQU2gS4gZ7TpiTECjDUxdQFd9bBBEWxDxPPfhLfYHVuei", "000002", "000000", "2020.10.20 18:20:30", "李白", "110100200101101201")
+	if err != nil {
+		fmt.Printf("Failed to submit transaction: %s\n", err)
+		os.Exit(1)
+	}
+	fmt.Println(string(result))
+
+	result, err = contract.EvaluateTransaction("queryCar", "CAR2")
+	if err != nil {
+		fmt.Printf("Failed to evaluate transaction: %s\n", err)
+		os.Exit(1)
+	}
+	fmt.Println(string(result))
+
+	_, err = contract.SubmitTransaction("changeCarOwner", "CAR2", "000003", "杜甫", "371510199002202838")
+	if err != nil {
+		fmt.Printf("Failed to submit transaction: %s\n", err)
+		os.Exit(1)
+	}
+
+	result, err = contract.EvaluateTransaction("queryCar", "CAR2")
+	if err != nil {
+		fmt.Printf("Failed to evaluate transaction: %s\n", err)
+		os.Exit(1)
+	}
+	//carStr = string(result)
+	fmt.Println(string(result))
+
+	type Car struct {
+		Title   string `json:"title"`
+		IpfsAddress string `json:"ipfsaddress"`
+		OwnerAccountId string `json:"owneraccountid"`
+		LastOwnerAccountId string `json:"lastowneraccountid"`
+		AcquireDate string `json:"acquiredate"`
+		OwnerName string `json:"ownername"`
+		OwnerCardNumber string `json:"ownercardnumber"`
+	}
+	type QueryResult struct {
+		Key    string `json:"Key"`
+		Record *Car
+	}
+	art := new(Car)
+	_ = json.Unmarshal(result, art)
+	fmt.Println("title--->"+art.Title)
+	fmt.Println("IpfsAddress--->"+art.IpfsAddress)
+	fmt.Println("OwnerAccountId--->"+art.OwnerAccountId)
+	fmt.Println("OwnerCardNumber--->"+art.OwnerCardNumber)
+
 }
+
+func populateWallet(wallet *gateway.Wallet) error {
+	credPath := filepath.Join(
+		"..",
+		"..",
+		"test-network",
+		"organizations",
+		"peerOrganizations",
+		"org1.example.com",
+		"users",
+		"User1@org1.example.com",
+		"msp",
+	)
+
+	certPath := filepath.Join(credPath, "signcerts", "cert.pem")
+	// read the certificate pem
+	cert, err := ioutil.ReadFile(filepath.Clean(certPath))
+	if err != nil {
+		return err
+	}
+
+	keyDir := filepath.Join(credPath, "keystore")
+	// there's a single file in this dir containing the private key
+	files, err := ioutil.ReadDir(keyDir)
+	if err != nil {
+		return err
+	}
+	if len(files) != 1 {
+		return errors.New("keystore folder should have contain one file")
+	}
+	keyPath := filepath.Join(keyDir, files[0].Name())
+	key, err := ioutil.ReadFile(filepath.Clean(keyPath))
+	if err != nil {
+		return err
+	}
+
+	identity := gateway.NewX509Identity("Org1MSP", string(cert), string(key))
+
+	err = wallet.Put("appUser", identity)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+//**************fabric部分******************
 
 // ShowAdd 展示添加文章界面
 func (a *ArticleController) ShowAdd() {

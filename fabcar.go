@@ -7,16 +7,12 @@ SPDX-License-Identifier: Apache-2.0
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	_ "fabcar/models"
 	_ "fabcar/routers"
-	"fmt"
 	"github.com/astaxie/beego"
-	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
 	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strconv"
 )
@@ -53,104 +49,7 @@ func AutoKey(key int) int {
 //********************CS系统部分*************************
 
 func main() {
-	os.Setenv("DISCOVERY_AS_LOCALHOST", "true")
-	wallet, err := gateway.NewFileSystemWallet("wallet")
-	if err != nil {
-		fmt.Printf("Failed to create wallet: %s\n", err)
-		os.Exit(1)
-	}
 
-	if !wallet.Exists("appUser") {
-		err = populateWallet(wallet)
-		if err != nil {
-			fmt.Printf("Failed to populate wallet contents: %s\n", err)
-			os.Exit(1)
-		}
-	}
-
-	ccpPath := filepath.Join(
-		"..",
-		"..",
-		"test-network",
-		"organizations",
-		"peerOrganizations",
-		"org1.example.com",
-		"connection-org1.yaml",
-	)
-
-	gw, err := gateway.Connect(
-		gateway.WithConfig(config.FromFile(filepath.Clean(ccpPath))),
-		gateway.WithIdentity(wallet, "appUser"),
-	)
-	if err != nil {
-		fmt.Printf("Failed to connect to gateway: %s\n", err)
-		os.Exit(1)
-	}
-	defer gw.Close()
-
-	network, err := gw.GetNetwork("mychannel")
-	if err != nil {
-		fmt.Printf("Failed to get network: %s\n", err)
-		os.Exit(1)
-	}
-
-	contract := network.GetContract("fabcar")
-
-	result, err := contract.EvaluateTransaction("queryAllCars")
-	if err != nil {
-		fmt.Printf("Failed to evaluate transaction: %s\n", err)
-		os.Exit(1)
-	}
-	fmt.Println(string(result))
-
-	result, err = contract.SubmitTransaction("createCar", "CAR2", "联盟链开发实战",
-		"https://ipfs.io/ipfs/QmQU2gS4gZ7TpiTECjDUxdQFd9bBBEWxDxPPfhLfYHVuei", "000002", "000000", "2020.10.20 18:20:30", "李白", "110100200101101201")
-	if err != nil {
-		fmt.Printf("Failed to submit transaction: %s\n", err)
-		os.Exit(1)
-	}
-	fmt.Println(string(result))
-
-	result, err = contract.EvaluateTransaction("queryCar", "CAR2")
-	if err != nil {
-		fmt.Printf("Failed to evaluate transaction: %s\n", err)
-		os.Exit(1)
-	}
-	fmt.Println(string(result))
-
-	_, err = contract.SubmitTransaction("changeCarOwner", "CAR2", "000003", "杜甫", "371510199002202838")
-	if err != nil {
-		fmt.Printf("Failed to submit transaction: %s\n", err)
-		os.Exit(1)
-	}
-
-	result, err = contract.EvaluateTransaction("queryCar", "CAR2")
-	if err != nil {
-		fmt.Printf("Failed to evaluate transaction: %s\n", err)
-		os.Exit(1)
-	}
-	//carStr = string(result)
-	fmt.Println(string(result))
-
-	type Car struct {
-		Title   string `json:"title"`
-		IpfsAddress string `json:"ipfsaddress"`
-		OwnerAccountId string `json:"owneraccountid"`
-		LastOwnerAccountId string `json:"lastowneraccountid"`
-		AcquireDate string `json:"acquiredate"`
-		OwnerName string `json:"ownername"`
-		OwnerCardNumber string `json:"ownercardnumber"`
-	}
-	type QueryResult struct {
-		Key    string `json:"Key"`
-		Record *Car
-	}
-	art := new(Car)
-	_ = json.Unmarshal(result, art)
-	fmt.Println("title--->"+art.Title)
-	fmt.Println("IpfsAddress--->"+art.IpfsAddress)
-	fmt.Println("OwnerAccountId--->"+art.OwnerAccountId)
-	fmt.Println("OwnerCardNumber--->"+art.OwnerCardNumber)
 
 	//********************CS系统部分*************************
 	//beego.Router("/",&HomeController{})
