@@ -11,7 +11,7 @@ func init() {
 	////建立路由过滤器,用于登录校验   参数一是过滤匹配支持正则    参数二过滤位置    参数三过滤操作（函数） 参数是context
 	//beego.InsertFilter("/article/*", beego.BeforeRouter, filter)
 	//// 登录
-	//beego.Router("/login", &controllers.UserController{}, "get:ShowLogin;post:HandleLogin")
+	beego.Router("/login", &controllers.UserController{}, "get:ShowLogin;post:HandleLogin")
 	//// 注册
 	//beego.Router("/register", &controllers.UserController{}, "get:ShowRegister;post:HandleRegister")
 	//// 展示首页
@@ -28,7 +28,7 @@ func init() {
 	//// 文章类型
 	////beego.Router("/article/addType", &controllers.ArticleController{}, "get:ShowArtType;post:AddType")
 	//// 退出
-	//beego.Router("/logout", &controllers.UserController{}, "get:LogOut")
+	beego.Router("/logout", &controllers.UserController{}, "get:LogOut")
 
 	beego.Router("/", &controllers.MainController{})
 	beego.InsertFilter("/article/*", beego.BeforeRouter, filter)
