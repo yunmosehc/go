@@ -40,7 +40,7 @@ type Article struct {
 	//OwnerName          string    `orm:"size(100)"`
 	//OwnerCardNumber    string    `orm:"size(100)"`
 
-	ArtID              string
+	ArtID              string		`orm:"pk"`
 	Title              string
 	IpfsAddress        string
 	OwnerAccountId     string
