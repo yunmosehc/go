@@ -7,8 +7,6 @@ import (
 	"math"
 	"strconv"
 	"time"
-	_ "fabcar/models"
-	_ "fabcar/routers"
 )
 
 // ArticleController 自定义控制器
