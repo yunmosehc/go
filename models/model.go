@@ -4,7 +4,6 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
-	"time"
 )
 
 /*数据库表结构的设计应该放在model文件夹下面*/
@@ -32,14 +31,23 @@ type Article struct {
 	//ArtType     *ArticleType `orm:"rel(fk)"`  //fk代表主键 和类型是一对多的关系
 	//Users       []*UserInfo  `orm:"rel(m2m)"` //和用户是多对多的关系
 
-	ArtID              int       `orm:"pk;auto"`
-	Title              string    `orm:"size(500)"`
-	IpfsAddress        string    `orm:"size(500)"`
-	OwnerAccountId     int       `orm:"default(0)"`
-	LastOwnerAccountId int       `orm:"default(0)"`
-	AcquireDate        time.Time `orm:"auto_now;type(date)"`
-	OwnerName          string    `orm:"size(100)"`
-	OwnerCardNumber    string    `orm:"size(100)"`
+	//ArtID              int       `orm:"pk;auto"`
+	//Title              string    `orm:"size(500)"`
+	//IpfsAddress        string    `orm:"size(500)"`
+	//OwnerAccountId     int       `orm:"default(0)"`
+	//LastOwnerAccountId int       `orm:"default(0)"`
+	//AcquireDate        time.Time `orm:"auto_now;type(date)"`
+	//OwnerName          string    `orm:"size(100)"`
+	//OwnerCardNumber    string    `orm:"size(100)"`
+
+	ArtID              string
+	Title              string
+	IpfsAddress        string
+	OwnerAccountId     string
+	LastOwnerAccountId string
+	AcquireDate        string
+	OwnerName          string
+	OwnerCardNumber    string
 }
 
 // ArticleType 文章类型表
