@@ -167,22 +167,22 @@ func (a *ArticleController) ShowIndex() {
 
 	//#################测试部分####################
 	//createCar的result是空的，要得到数据必须再querycar
-	result, err := contract.SubmitTransaction("createCar", "CAR1", "联盟链开发实战",
-		"https://ipfs.io/ipfs/QmQU2gS4gZ7TpiTECjDUxdQFd9bBBEWxDxPPfhLfYHVuei", "000002", "000000", "2020.10.20 18:20:30", "李白", "110100200101101201")
+	result, err := contract.SubmitTransaction("createCar", "第二篇文章",
+		"https://ipfs.io/ipfs/QmQU2gS4gZ7TpiTECjDUxdQFd9bBBEWxDxPPfhLfYHVuei", "0002", "0000", "2020.10.20 18:20:30", "李白", "110100200101101201")
 	if err != nil {
 		fmt.Printf("Failed to submit transaction: %s\n", err)
 		os.Exit(1)
 	}
 
-	result, err = contract.SubmitTransaction("createCar", "CAR2", "第三篇文章",
-		"https://ipfs.io/ipfs/QmQU2gS4gZ7TpiTECjDUxdQFd9bBBEWxDxPPfhLfYHVuei", "000002", "000000", "2020.10.20 18:20:30", "王维", "110100200101101201")
+	result, err = contract.SubmitTransaction("createCar", "第三篇文章",
+		"https://ipfs.io/ipfs/QmQU2gS4gZ7TpiTECjDUxdQFd9bBBEWxDxPPfhLfYHVuei", "0002", "0000", "2020.10.20 18:20:30", "王维", "110100200101101201")
 	if err != nil {
 		fmt.Printf("Failed to submit transaction: %s\n", err)
 		os.Exit(1)
 	}
 
-	result, err = contract.SubmitTransaction("createCar", "CAR3", "第四篇文章",
-		"https://ipfs.io/ipfs/QmQU2gS4gZ7TpiTECjDUxdQFd9bBBEWxDxPPfhLfYHVuei", "000002", "000000", "2020.10.20 18:20:30", "王羲之", "110100200101101201")
+	result, err = contract.SubmitTransaction("createCar", "第四篇文章",
+		"https://ipfs.io/ipfs/QmQU2gS4gZ7TpiTECjDUxdQFd9bBBEWxDxPPfhLfYHVuei", "0002", "0000", "2020.10.20 18:20:30", "王羲之", "110100200101101201")
 	if err != nil {
 		fmt.Printf("Failed to submit transaction: %s\n", err)
 		os.Exit(1)
