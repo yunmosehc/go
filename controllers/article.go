@@ -564,7 +564,14 @@ func (a *ArticleController) HandleDelete() {
 	//	return
 	//}
 
-	// 3.跳转列表页
+	// 3.删除文章
+	_, err = contract.SubmitTransaction("deletecarowner", artid)
+	if err != nil {
+		fmt.Printf("Failed to evaluate transaction: %s\n", err)
+		beego.Info("提交删除文章交易失败")
+	}
+
+	// 4.跳转列表页
 	a.Redirect("/article/index?accountid="+a.GetString("accountid"), 302)
 }
 
