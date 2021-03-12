@@ -21,6 +21,20 @@ type ArticleController struct {
 	beego.Controller
 }
 
+type Car struct {
+	Title   string `json:"title"`
+	IpfsAddress string `json:"ipfsaddress"`
+	OwnerAccountId string `json:"owneraccountid"`
+	LastOwnerAccountId string `json:"lastowneraccountid"`
+	AcquireDate string `json:"acquiredate"`
+	OwnerName string `json:"ownername"`
+	OwnerCardNumber string `json:"ownercardnumber"`
+}
+type QueryResult struct {
+	Key    string `json:"Key"`
+	Record *Car
+}
+
 // ShowIndex 展示首页并实现分页功能
 func (a *ArticleController) ShowIndex() {
 	//// 1.查询所有文章数据
@@ -120,12 +134,7 @@ func (a *ArticleController) ShowIndex() {
 
 	contract := network.GetContract("fabcar")
 
-	//result, err := contract.EvaluateTransaction("queryAllCars")
-	//if err != nil {
-	//	fmt.Printf("Failed to evaluate transaction: %s\n", err)
-	//	os.Exit(1)
-	//}
-	//fmt.Println(string(result))
+
 	//
 	//result, err = contract.SubmitTransaction("createCar", "CAR2", "联盟链开发实战",
 	//	"https://ipfs.io/ipfs/QmQU2gS4gZ7TpiTECjDUxdQFd9bBBEWxDxPPfhLfYHVuei", "000002", "000000", "2020.10.20 18:20:30", "李白", "110100200101101201")
@@ -157,25 +166,13 @@ func (a *ArticleController) ShowIndex() {
 	//fmt.Println(string(result))
 
 	//#################测试部分####################
-	result, err := contract.EvaluateTransaction("queryCar", "CAR0")
+	result, err := contract.SubmitTransaction("createCar", "CAR2", "联盟链开发实战",
+		"https://ipfs.io/ipfs/QmQU2gS4gZ7TpiTECjDUxdQFd9bBBEWxDxPPfhLfYHVuei", "000002", "000000", "2020.10.20 18:20:30", "李白", "110100200101101201")
 	if err != nil {
-		fmt.Printf("Failed to evaluate transaction: %s\n", err)
+		fmt.Printf("Failed to submit transaction: %s\n", err)
 		os.Exit(1)
 	}
 
-	type Car struct {
-		Title   string `json:"title"`
-		IpfsAddress string `json:"ipfsaddress"`
-		OwnerAccountId string `json:"owneraccountid"`
-		LastOwnerAccountId string `json:"lastowneraccountid"`
-		AcquireDate string `json:"acquiredate"`
-		OwnerName string `json:"ownername"`
-		OwnerCardNumber string `json:"ownercardnumber"`
-	}
-	type QueryResult struct {
-		Key    string `json:"Key"`
-		Record *Car
-	}
 	art := new(Car)
 	_ = json.Unmarshal(result, art)
 
@@ -200,6 +197,14 @@ func (a *ArticleController) ShowIndex() {
 	a.Data["isLastPage"] = false
 	a.Data["articles"] = articles
 	a.TplName = "index.html"
+
+	result, err = contract.EvaluateTransaction("queryAllCars")
+	if err != nil {
+		fmt.Printf("Failed to evaluate transaction: %s\n", err)
+		os.Exit(1)
+	}
+	fmt.Println("----------->")
+	fmt.Println(string(result))
 }
 
 func populateWallet(wallet *gateway.Wallet) error {
