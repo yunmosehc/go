@@ -172,6 +172,8 @@ func (a *ArticleController) ShowIndex() {
 		fmt.Printf("Failed to submit transaction: %s\n", err)
 		os.Exit(1)
 	}
+	fmt.Println("@@@@@@@@@@@@@@@@@@@@@")
+	fmt.Println(string(result))
 
 	art := new(Car)
 	_ = json.Unmarshal(result, art)
@@ -206,7 +208,6 @@ func (a *ArticleController) ShowIndex() {
 	fmt.Println("----------->")
 	var queryResult QueryResult
 	_ = json.Unmarshal(result, queryResult)
-	fmt.Println(string(queryResult.Record.Title))
 }
 
 func populateWallet(wallet *gateway.Wallet) error {
