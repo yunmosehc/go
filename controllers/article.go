@@ -179,23 +179,40 @@ func (a *ArticleController) ShowIndex() {
 		fmt.Printf("Failed to evaluate transaction: %s\n", err)
 		os.Exit(1)
 	}
-	fmt.Println("----------->>>>>")
-	fmt.Println(string(result))
 
-	art := new(Car)
-	_ = json.Unmarshal(result, art)
+	fmt.Println("----------->>>>>")
+	queryResults := new([2]QueryResult)
+	json.Unmarshal(result, queryResults)
 
 	var articles []models.Article
-	var article models.Article
-	article.ArtID = "1"
-	article.Title = art.Title
-	article.IpfsAddress = art.IpfsAddress
-	article.OwnerAccountId = art.OwnerAccountId
-	article.LastOwnerAccountId = art.LastOwnerAccountId
-	article.AcquireDate = art.AcquireDate
-	article.OwnerName = art.OwnerName
-	article.OwnerCardNumber = art.OwnerCardNumber
-	articles = append(articles, article)
+	for i:=0; i<=1; i++ {
+		art := queryResults[i].Record
+		var article models.Article
+		article.ArtID = "1"
+		article.Title = art.Title
+		article.IpfsAddress = art.IpfsAddress
+		article.OwnerAccountId = art.OwnerAccountId
+		article.LastOwnerAccountId = art.LastOwnerAccountId
+		article.AcquireDate = art.AcquireDate
+		article.OwnerName = art.OwnerName
+		article.OwnerCardNumber = art.OwnerCardNumber
+		articles = append(articles, article)
+	}
+
+	//art := new(Car)
+	//_ = json.Unmarshal(result, art)
+	//
+	//var articles []models.Article
+	//var article models.Article
+	//article.ArtID = "1"
+	//article.Title = art.Title
+	//article.IpfsAddress = art.IpfsAddress
+	//article.OwnerAccountId = art.OwnerAccountId
+	//article.LastOwnerAccountId = art.LastOwnerAccountId
+	//article.AcquireDate = art.AcquireDate
+	//article.OwnerName = art.OwnerName
+	//article.OwnerCardNumber = art.OwnerCardNumber
+	//articles = append(articles, article)
 
 	a.Data["username"] = a.GetSession("username")
 	a.Data["accountid"] = a.GetSession("accountid")
