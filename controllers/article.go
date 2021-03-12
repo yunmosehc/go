@@ -204,7 +204,9 @@ func (a *ArticleController) ShowIndex() {
 		os.Exit(1)
 	}
 	fmt.Println("----------->")
-	fmt.Println(string(result))
+	var queryResult QueryResult
+	_ = json.Unmarshal(result, queryResult)
+	fmt.Println(string(queryResult.Record.Title))
 }
 
 func populateWallet(wallet *gateway.Wallet) error {
