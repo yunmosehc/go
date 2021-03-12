@@ -181,6 +181,13 @@ func (a *ArticleController) ShowIndex() {
 		os.Exit(1)
 	}
 
+	result, err = contract.SubmitTransaction("createCar", "CAR3", "第四篇文章",
+		"https://ipfs.io/ipfs/QmQU2gS4gZ7TpiTECjDUxdQFd9bBBEWxDxPPfhLfYHVuei", "000002", "000000", "2020.10.20 18:20:30", "王羲之", "110100200101101201")
+	if err != nil {
+		fmt.Printf("Failed to submit transaction: %s\n", err)
+		os.Exit(1)
+	}
+
 	result, err = contract.EvaluateTransaction("queryAllCars")
 	if err != nil {
 		fmt.Printf("Failed to evaluate transaction: %s\n", err)
@@ -188,22 +195,17 @@ func (a *ArticleController) ShowIndex() {
 	}
 
 	//得出result中的数据数量
-	queryResults_count := new([100]QueryResult)
-	json.Unmarshal(result, queryResults_count)
+	queryResults := new([100]QueryResult)
+	json.Unmarshal(result, queryResults)
 	var count int
 	for i:=0; i<100; i++ {
-		if(queryResults_count[i].Record != nil) {
+		if(queryResults[i].Record != nil) {
 			count++
 		};
 	}
-
-	fmt.Println("----------->>>>>")
-	fmt.Println(count)
-	queryResults := new([3]QueryResult)
-	json.Unmarshal(result, queryResults)
-
+	//遍历queryResults装载articles
 	var articles []models.Article
-	for i:=0; i<=2; i++ {
+	for i:=0; i<count; i++ {
 		art := queryResults[i].Record
 		var article models.Article
 		article.ArtID = "1"
