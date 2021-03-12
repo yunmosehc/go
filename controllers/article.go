@@ -187,8 +187,18 @@ func (a *ArticleController) ShowIndex() {
 		os.Exit(1)
 	}
 
+	//得出result中的数据数量
+	queryResults_count := new([100]QueryResult)
+	json.Unmarshal(result, queryResults_count)
+	var count int
+	for i:=0; i<100; i++ {
+		if(queryResults_count[i].Record != nil) {
+			count++
+		};
+	}
+
 	fmt.Println("----------->>>>>")
-	fmt.Println(len(result))
+	fmt.Println(count)
 	queryResults := new([3]QueryResult)
 	json.Unmarshal(result, queryResults)
 
