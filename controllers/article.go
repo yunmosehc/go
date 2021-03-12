@@ -167,8 +167,15 @@ func (a *ArticleController) ShowIndex() {
 
 	//#################测试部分####################
 	//createCar的result是空的，要得到数据必须再querycar
-	result, err := contract.SubmitTransaction("createCar", "CAR2", "联盟链开发实战",
+	result, err := contract.SubmitTransaction("createCar", "CAR1", "联盟链开发实战",
 		"https://ipfs.io/ipfs/QmQU2gS4gZ7TpiTECjDUxdQFd9bBBEWxDxPPfhLfYHVuei", "000002", "000000", "2020.10.20 18:20:30", "李白", "110100200101101201")
+	if err != nil {
+		fmt.Printf("Failed to submit transaction: %s\n", err)
+		os.Exit(1)
+	}
+
+	result, err = contract.SubmitTransaction("createCar", "CAR2", "第三篇文章",
+		"https://ipfs.io/ipfs/QmQU2gS4gZ7TpiTECjDUxdQFd9bBBEWxDxPPfhLfYHVuei", "000002", "000000", "2020.10.20 18:20:30", "王维", "110100200101101201")
 	if err != nil {
 		fmt.Printf("Failed to submit transaction: %s\n", err)
 		os.Exit(1)
@@ -181,11 +188,12 @@ func (a *ArticleController) ShowIndex() {
 	}
 
 	fmt.Println("----------->>>>>")
-	queryResults := new([2]QueryResult)
+	fmt.Println(len(result))
+	queryResults := new([3]QueryResult)
 	json.Unmarshal(result, queryResults)
 
 	var articles []models.Article
-	for i:=0; i<=1; i++ {
+	for i:=0; i<=2; i++ {
 		art := queryResults[i].Record
 		var article models.Article
 		article.ArtID = "1"
