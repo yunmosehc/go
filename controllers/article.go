@@ -166,14 +166,19 @@ func (a *ArticleController) ShowIndex() {
 	//fmt.Println(string(result))
 
 	//#################测试部分####################
+	//createCar的result是空的，要得到数据必须再querycar
 	result, err := contract.SubmitTransaction("createCar", "CAR2", "联盟链开发实战",
 		"https://ipfs.io/ipfs/QmQU2gS4gZ7TpiTECjDUxdQFd9bBBEWxDxPPfhLfYHVuei", "000002", "000000", "2020.10.20 18:20:30", "李白", "110100200101101201")
 	if err != nil {
 		fmt.Printf("Failed to submit transaction: %s\n", err)
 		os.Exit(1)
 	}
-	fmt.Println("@@@@@@@@@@@@@@@@@@@@@")
-	fmt.Println(string(result))
+
+	result, err = contract.EvaluateTransaction("queryCar", "CAR2")
+	if err != nil {
+		fmt.Printf("Failed to evaluate transaction: %s\n", err)
+		os.Exit(1)
+	}
 
 	art := new(Car)
 	_ = json.Unmarshal(result, art)
