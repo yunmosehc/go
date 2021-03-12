@@ -419,7 +419,7 @@ func (a *ArticleController) HandleAdd() {
 	//a.TplName = "index.html"
 }
 
-// ShowContent 展示详情页面
+//ShowContent 展示详情页面
 //func (a *ArticleController) ShowContent() {
 //	// 1.获取文章id
 //	sid := a.GetString("id")
@@ -441,37 +441,37 @@ func (a *ArticleController) HandleAdd() {
 //	a.TplName = "content.html"
 //}
 
-//// ShowEdit 展示编辑页面
-//func (a *ArticleController) ShowUpdate() {
-//	a.TplName = "update.html"
-//	//// 1.获取文章id
-//	//id, _ := a.GetInt("id")
-//	//// 2.根据id查询文章信息
-//	//o := orm.NewOrm()
-//	//// 2.1 获取文章类型
-//	////var types []models.ArticleType
-//	////_, err := o.QueryTable("ArticleType").RelatedSel().All(&types)
-//	////if err != nil {
-//	////	beego.Info("获取文章类型错误")
-//	////	a.Redirect("/article/index", 302)
-//	////	return
-//	////}
-//	//
-//	//article := models.Article{ArtID: id}
-//	//var err error
-//	//err = o.Read(&article)
-//	//if err != nil {
-//	//	beego.Info("查询数据信息失败")
-//	//	a.Redirect("/article/index", 302)
-//	//	return
-//	//}
-//	//// 3.将文章信息传给视图
-//	////a.Data["types"] = types
-//	a.Data["username"] = a.GetSession("username")
-//	a.Data["accountid"] = a.GetSession("accountid")
-//	//a.Data["article"] = article
-//}
-//
+// ShowEdit 展示编辑页面
+func (a *ArticleController) ShowUpdate() {
+	a.TplName = "update.html"
+	//// 1.获取文章id
+	//id, _ := a.GetInt("id")
+	//// 2.根据id查询文章信息
+	//o := orm.NewOrm()
+	//// 2.1 获取文章类型
+	////var types []models.ArticleType
+	////_, err := o.QueryTable("ArticleType").RelatedSel().All(&types)
+	////if err != nil {
+	////	beego.Info("获取文章类型错误")
+	////	a.Redirect("/article/index", 302)
+	////	return
+	////}
+	//
+	//article := models.Article{ArtID: id}
+	//var err error
+	//err = o.Read(&article)
+	//if err != nil {
+	//	beego.Info("查询数据信息失败")
+	//	a.Redirect("/article/index", 302)
+	//	return
+	//}
+	//// 3.将文章信息传给视图
+	////a.Data["types"] = types
+	a.Data["username"] = a.GetSession("username")
+	a.Data["accountid"] = a.GetSession("accountid")
+	//a.Data["article"] = article
+}
+
 //// Edit 编辑文章业务处理
 //func (a *ArticleController) HandleUpdate() {
 //	// 1.获取页面数据
@@ -526,55 +526,49 @@ func (a *ArticleController) HandleAdd() {
 //		return
 //	}
 //}
-//
-////展示删除产权界面
-//func (a *ArticleController) ShowDelete() {
-//	a.Data["username"] = a.GetSession("username")
-//	a.Data["accountid"] = a.GetSession("accountid")
-//	a.TplName = "delete.html"
-//}
-//
-//// Delete 删除业务处理
-//func (a *ArticleController) HandleDelete() {
-//	// 1.获取文章id
-//	artid, _ := a.GetInt("artid")
-//	// 2.查询出对应数据并删除
-//	o := orm.NewOrm()
-//	article := models.Article{ArtID: artid}
-//	//判断文章是否存在
-//	err := o.Read(&article)
-//	if err != nil {
-//		beego.Info("获取文章信息失败")
-//		a.Redirect("/article/delete", 302)
-//		return
-//	}
-//	//判断提交的信息是否有误
-//	accountId := a.GetString("accountid")
-//	accountid, err := strconv.Atoi(accountId)
-//	if article.OwnerAccountId != accountid {
-//		beego.Info("您无法删除不属于您的文章！")
-//		a.Redirect("/article/delete", 302)
-//		return
-//	}
-//	ownername := a.GetString("ownername")
-//	ownercardnumber := a.GetString("ownercardnumber")
-//	if article.OwnerName != ownername || article.OwnerCardNumber != ownercardnumber {
-//		beego.Info("产权人姓名或身份证号有误！")
-//		a.Redirect("/article/delete", 302)
-//		return
-//	}
-//
-//	_, err = o.Delete(&article)
-//	if err != nil {
-//		beego.Info("获取文章信息失败")
-//		a.Redirect("/article/index?accountid="+a.GetString("accountid"), 302)
-//		return
-//	}
-//	// 3.跳转列表页
-//	a.Redirect("/article/index?accountid="+a.GetString("accountid"), 302)
-//}
 
-// ShowArtType 展示文章类型
+//展示删除产权界面
+func (a *ArticleController) ShowDelete() {
+	a.Data["username"] = a.GetSession("username")
+	a.Data["accountid"] = a.GetSession("accountid")
+	a.TplName = "delete.html"
+}
+
+// Delete 删除业务处理
+func (a *ArticleController) HandleDelete() {
+	// 1.获取文章id
+	artid := a.GetString("artid")
+	// 2.查询出对应数据
+	result, err := contract.EvaluateTransaction("queryCar", artid)
+	//判断文章是否存在
+	if err != nil {
+		fmt.Printf("Failed to evaluate transaction: %s\n", err)
+		beego.Info("文章编号不存在")
+		a.Redirect("/article/delete", 302)
+		os.Exit(1)
+	}
+	car := new(Car)
+	json.Unmarshal(result, car)
+	//fmt.Println(string(result))
+	//判断提交的信息是否有误
+	accountId := a.GetString("accountid")
+	if car.OwnerAccountId != accountId {
+		beego.Info("您无法删除不属于您的文章！")
+		a.Redirect("/article/delete", 302)
+		return
+	}
+
+	//if car.OwnerName != a.GetString("ownername") || car.OwnerCardNumber != a.GetString("ownercardnumber") {
+	//	beego.Info("产权人姓名或身份证号有误！")
+	//	a.Redirect("/article/delete", 302)
+	//	return
+	//}
+
+	// 3.跳转列表页
+	a.Redirect("/article/index?accountid="+a.GetString("accountid"), 302)
+}
+
+//ShowArtType 展示文章类型
 //func (a *ArticleController) ShowArtType() {
 //	a.TplName = "addType.html"
 //	// 1.读取文章类型表
@@ -588,8 +582,8 @@ func (a *ArticleController) HandleAdd() {
 //	a.Data["username"] = a.GetSession("username")
 //	a.Data["types"] = types
 //}
-
-// AddType 添加文章类型
+//
+//AddType 添加文章类型
 //func (a *ArticleController) AddType() {
 //	// 1.获取前端数据
 //	typeName := a.GetString("typeName")
