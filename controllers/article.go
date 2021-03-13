@@ -192,6 +192,9 @@ func (a *ArticleController) ShowIndex() {
 	//	os.Exit(1)
 	//}
 
+	//获得当前用户编号
+	accountId := a.Ctx.GetCookie("accountid")
+
 	//如果contract还未初始化，先初始化contract
 	if contract == nil{
 		getContract()
@@ -216,16 +219,18 @@ func (a *ArticleController) ShowIndex() {
 	var articles []models.Article
 	for i:=0; i<count; i++ {
 		art := queryResults[i].Record
-		var article models.Article
-		article.ArtID = queryResults[i].Key
-		article.Title = art.Title
-		article.IpfsAddress = art.IpfsAddress
-		article.OwnerAccountId = art.OwnerAccountId
-		article.LastOwnerAccountId = art.LastOwnerAccountId
-		article.AcquireDate = art.AcquireDate
-		article.OwnerName = art.OwnerName
-		article.OwnerCardNumber = art.OwnerCardNumber
-		articles = append(articles, article)
+		if art.OwnerAccountId == accountId {
+			var article models.Article
+			article.ArtID = queryResults[i].Key
+			article.Title = art.Title
+			article.IpfsAddress = art.IpfsAddress
+			article.OwnerAccountId = art.OwnerAccountId
+			article.LastOwnerAccountId = art.LastOwnerAccountId
+			article.AcquireDate = art.AcquireDate
+			article.OwnerName = art.OwnerName
+			article.OwnerCardNumber = art.OwnerCardNumber
+			articles = append(articles, article)
+		}
 	}
 
 	//art := new(Car)
@@ -245,12 +250,6 @@ func (a *ArticleController) ShowIndex() {
 
 	a.Data["username"] = a.GetSession("username")
 	a.Data["accountid"] = a.GetSession("accountid")
-
-	accountId := a.Ctx.GetCookie("accountid")
-	beego.Info("********************")
-	beego.Info(accountId)
-	beego.Info("********************")
-
 	a.Data["count"] = 1
 	a.Data["pageCount"] = 1
 	a.Data["pageIndex"] = 1
