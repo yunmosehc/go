@@ -246,10 +246,9 @@ func (a *ArticleController) ShowIndex() {
 	a.Data["username"] = a.GetSession("username")
 	a.Data["accountid"] = a.GetSession("accountid")
 
-	var r *http.Request
-	c1, err := r.Cookie("accountid")
+	accountId := a.Ctx.GetCookie("accountid")
 	beego.Info("********************")
-	beego.Info(c1.Domain)
+	beego.Info(accountId)
 	beego.Info("********************")
 
 	a.Data["count"] = 1
