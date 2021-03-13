@@ -18,7 +18,6 @@ import (
 	//"strconv"
 	//"time"
 	"errors"
-	"github.com/hyperledger/fabric-chaincode-go/shim"
 )
 
 // ArticleController 自定义控制器
