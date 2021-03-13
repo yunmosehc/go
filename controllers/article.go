@@ -444,7 +444,7 @@ func (a *ArticleController) HandleAdd() {
 
 // ShowEdit 展示编辑页面
 func (a *ArticleController) ShowUpdate() {
-	a.TplName = "update.html"
+
 	//// 1.获取文章id
 	//id, _ := a.GetInt("id")
 	//// 2.根据id查询文章信息
@@ -470,7 +470,7 @@ func (a *ArticleController) ShowUpdate() {
 	////a.Data["types"] = types
 	a.Data["username"] = a.GetSession("username")
 	a.Data["accountid"] = a.GetSession("accountid")
-	//a.Data["article"] = article
+	a.TplName = "update.html"
 }
 
 // 产权转让业务处理
