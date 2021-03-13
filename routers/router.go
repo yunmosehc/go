@@ -21,6 +21,8 @@ func init() {
 	beego.Router("/article/add", &controllers.ArticleController{}, "get:ShowAdd;post:HandleAdd")
 	//// 文章详情
 	////beego.Router("/article/content", &controllers.ArticleController{}, "get:ShowContent")
+	// 编辑产权信息
+	beego.Router("/article/edit", &controllers.ArticleController{}, "get:ShowEdit;post:HandleEdit")
 	// 编辑文章
 	beego.Router("/article/update", &controllers.ArticleController{}, "get:ShowUpdate;post:HandleUpdate")
 	// 删除文章

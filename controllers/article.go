@@ -442,7 +442,7 @@ func (a *ArticleController) HandleAdd() {
 //	a.TplName = "content.html"
 //}
 
-// ShowEdit 展示编辑页面
+// ShowUpdate 展示产权转让页面
 func (a *ArticleController) ShowUpdate() {
 
 	//// 1.获取文章id
@@ -500,7 +500,7 @@ func (a *ArticleController) HandleUpdate() {
 	accountId := a.GetString("accountid")
 	if car.OwnerAccountId != accountId {
 		beego.Info("您无法删除不属于您的文章！")
-		a.Redirect("/article/delete", 302)
+		a.Redirect("/article/update", 302)
 		return
 	}
 	//判断新产权人账户是否存在
@@ -517,6 +517,50 @@ func (a *ArticleController) HandleUpdate() {
 	// 3.更新文章产权信息
 	_, err = contract.SubmitTransaction("changeCarOwner", artId,
 		newOwnerAccountId, lastOwnerAccountId, time_now, newOwnerName, newOwnerCardNumber)
+	if err != nil {
+		fmt.Printf("Failed to submit transaction: %s\n", err)
+		beego.Info("changeCarOwner交易执行失败")
+		a.Redirect("/article/update", 302)
+		os.Exit(1)
+	}
+	a.Redirect("/article/index?accountid="+a.GetString("accountid"), 302)
+}
+
+// ShowEdit 展示产权信息编辑页面
+func (a *ArticleController) ShowEdit() {
+	a.Data["username"] = a.GetSession("username")
+	a.Data["accountid"] = a.GetSession("accountid")
+	a.TplName = "edit.html"
+}
+
+// 产权信息编辑处理
+func (a *ArticleController) HandleEdit() {
+	// 1.获取页面数据
+	artId := a.GetString("artid")
+	newOwnerName := a.GetString("newownername")
+	newOwnerCardNumber := a.GetString("newownercardnumber")
+
+	// 2.判断合法性
+	//判断文章是否存在
+	result, err := contract.EvaluateTransaction("queryCar", artId)
+	if err != nil {
+		fmt.Printf("Failed to submit transaction: %s\n", err)
+		beego.Info("该文章编号不存在！")
+		a.Redirect("/article/delete", 302)
+		os.Exit(1)
+	}
+	//判断是否有操作权限
+	car := new(Car)
+	json.Unmarshal(result, car)
+	accountId := a.GetString("accountid")
+	if car.OwnerAccountId != accountId {
+		beego.Info("您无法删除不属于您的文章！")
+		a.Redirect("/article/update", 302)
+		return
+	}
+
+	// 3.更新文章产权信息
+	_, err = contract.SubmitTransaction("changeCarOwner", artId, newOwnerName, newOwnerCardNumber)
 	if err != nil {
 		fmt.Printf("Failed to submit transaction: %s\n", err)
 		beego.Info("changeCarOwner交易执行失败")
