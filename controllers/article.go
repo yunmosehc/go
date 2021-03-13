@@ -5,6 +5,7 @@ import (
 	"fabcar/models"
 	"fmt"
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/orm"
 	"strconv"
 	"time"
 
@@ -472,60 +473,58 @@ func (a *ArticleController) ShowUpdate() {
 	//a.Data["article"] = article
 }
 
-//// Edit 编辑文章业务处理
-//func (a *ArticleController) HandleUpdate() {
-//	// 1.获取页面数据
-//	artId := a.GetString("artid")
-//	owneraccountId := a.GetString("newaccountid")
-//	ownername := a.GetString("ownername")
-//	ownercardnumber := a.GetString("ownercardnumber")
-//	//string转int
-//	artid, err := strconv.Atoi(artId)
-//	owneraccountid, err := strconv.Atoi(owneraccountId)
-//	if err != nil {
-//	}
-//	//2.判断文章是否存在
-//	o := orm.NewOrm()
-//	art_old := models.Article{ArtID: artid}
-//	err = o.Read(&art_old)
-//	if err != nil {
-//		beego.Info("该文章编号不存在！")
-//		a.Redirect("/article/update", 302)
-//		return
-//	}
-//	//判断新产权人账户是否存在
-//	newowneraccountid := models.UserInfo{AccountId: owneraccountid}
-//	err = o.Read(&newowneraccountid)
-//	if err != nil {
-//		beego.Info("该产权人编号不存在！")
-//		a.Redirect("/article/update", 302)
-//		return
-//	}
-//	//3.取出文章产权信息
-//	title := art_old.Title
-//	ipfsAddress := art_old.IpfsAddress
-//	// 4.更新文章产权信息
-//	art_new := models.Article{
-//		ArtID:           artid,
-//		OwnerAccountId:  owneraccountid,
-//		OwnerName:       ownername,
-//		OwnerCardNumber: ownercardnumber,
-//		Title:           title,
-//		IpfsAddress:     ipfsAddress,
-//	}
-//	var err1 error
-//	_, err1 = o.Update(&art_new)
-//	if err1 == nil {
-//		beego.Info("when update,accountid is:")
-//		beego.Info("/article/index?accountid="+a.GetString("accountid"))
-//		a.Redirect("/article/index?accountid="+a.GetString("accountid"), 302)
-//		return
-//	} else {
-//		beego.Info("更新数据信息失败")
-//		a.Redirect("/article/update", 302)
-//		return
-//	}
-//}
+// 产权转让业务处理
+func (a *ArticleController) HandleUpdate() {
+	// 1.获取页面数据
+	artId := a.GetString("artid")
+	newOwnerAccountId := a.GetString("newaccountid")
+	lastOwnerAccountId := a.GetString("accountid")
+	t := time.Now()
+	time_now :=fmt.Sprintf("%4d.%02d.%02d %02d:%02d:%02d(%02d)\n",t.Year(),t.Month(),t.Day(),t.Hour(),t.Minute(),t.Second(),t.Nanosecond())
+	newOwnerName := a.GetString("newownername")
+	newOwnerCardNumber := a.GetString("newownercardnumber")
+
+	// 2.判断合法性
+	//判断文章是否存在
+	//car, err := s.QueryCar(ctx, carNumber)
+	result, err := contract.EvaluateTransaction("queryCar", artId)
+	if err != nil {
+		fmt.Printf("Failed to submit transaction: %s\n", err)
+		beego.Info("该文章编号不存在！")
+		a.Redirect("/article/delete", 302)
+		os.Exit(1)
+	}
+	//判断是否有操作权限
+	car := new(Car)
+	json.Unmarshal(result, car)
+	accountId := a.GetString("accountid")
+	if car.OwnerAccountId != accountId {
+		beego.Info("您无法删除不属于您的文章！")
+		a.Redirect("/article/delete", 302)
+		return
+	}
+	//判断新产权人账户是否存在
+	o := orm.NewOrm()
+	new_OwnerAccountId, err := strconv.Atoi(newOwnerAccountId)
+	newowneraccountid := models.UserInfo{AccountId: new_OwnerAccountId}
+	err = o.Read(&newowneraccountid)
+	if err != nil {
+		beego.Info("新产权人编号不存在！")
+		a.Redirect("/article/update", 302)
+		return
+	}
+
+	// 3.更新文章产权信息
+	_, err = contract.SubmitTransaction("changeCarOwner", artId,
+		newOwnerAccountId, lastOwnerAccountId, time_now, newOwnerName, newOwnerCardNumber)
+	if err != nil {
+		fmt.Printf("Failed to submit transaction: %s\n", err)
+		beego.Info("changeCarOwner交易执行失败")
+		a.Redirect("/article/update", 302)
+		os.Exit(1)
+	}
+	a.Redirect("/article/index?accountid="+a.GetString("accountid"), 302)
+}
 
 //展示删除产权界面
 func (a *ArticleController) ShowDelete() {
@@ -540,17 +539,17 @@ func (a *ArticleController) HandleDelete() {
 	artid := a.GetString("artid")
 	// 2.查询出对应数据
 	result, err := contract.EvaluateTransaction("queryCar", artid)
-	//判断文章是否存在
+	// 3.合法性判断
+	// 判断文章是否存在
 	if err != nil {
 		fmt.Printf("Failed to evaluate transaction: %s\n", err)
 		beego.Info("文章编号不存在")
 		a.Redirect("/article/delete", 302)
 		os.Exit(1)
 	}
+	// 判断操作者是否是产权人
 	car := new(Car)
 	json.Unmarshal(result, car)
-	//fmt.Println(string(result))
-	//判断提交的信息是否有误
 	accountId := a.GetString("accountid")
 	if car.OwnerAccountId != accountId {
 		beego.Info("您无法删除不属于您的文章！")
@@ -564,14 +563,16 @@ func (a *ArticleController) HandleDelete() {
 	//	return
 	//}
 
-	// 3.删除文章
-	_, err = contract.SubmitTransaction("deletecarowner", artid)
+	// 4.删除文章
+	_, err = contract.SubmitTransaction("deleteCarOwner", artid)
 	if err != nil {
 		fmt.Printf("Failed to evaluate transaction: %s\n", err)
 		beego.Info("提交删除文章交易失败")
+		a.Redirect("/article/delete", 302)
+		os.Exit(1)
 	}
 
-	// 4.跳转列表页
+	// 5.跳转列表页
 	a.Redirect("/article/index?accountid="+a.GetString("accountid"), 302)
 }
 
