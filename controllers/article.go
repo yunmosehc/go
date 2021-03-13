@@ -617,11 +617,13 @@ func (a *ArticleController) HandleDelete() {
 func (a *ArticleController) ShowTraceBack() {
 	a.Data["username"] = a.GetSession("username")
 	a.Data["accountid"] = a.GetSession("accountid")
+	beego.Info("------------------>>>>>>>>>>>>>ShowTraceBack")
 	a.TplName = "traceback.html"
 }
 
 // HandleTraceBack 展示产权追溯内容
 func (a *ArticleController) HandleTraceBack() {
+	beego.Info("------------------>>>>>>>>>>>>>HandleTraceBack")
 	//如果contract还未初始化，先初始化contract
 	if contract == nil{
 		getContract()
