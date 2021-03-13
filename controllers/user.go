@@ -63,6 +63,9 @@ func (u *UserController) ShowLogin() {
 	u.TplName = "login.html"
 	// 获取cookie，如果有，显示用户名，没有就显示空
 	userName := u.Ctx.GetCookie("username")
+	beego.Info(">>>>>>>>>>>>>>>>>>>>")
+	beego.Info(userName)
+	beego.Info(">>>>>>>>>>>>>>>>>>>>")
 	//fmt.Println(userName)
 	//decName,_ := base64.StdEncoding.DecodeString(userName)
 	if userName != "" {
