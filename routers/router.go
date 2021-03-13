@@ -31,6 +31,8 @@ func init() {
 	////beego.Router("/article/addType", &controllers.ArticleController{}, "get:ShowArtType;post:AddType")
 	//// 退出
 	beego.Router("/logout", &controllers.UserController{}, "get:LogOut")
+	// 产权回溯
+	beego.Router("/article/traceback", &controllers.ArticleController{}, "get:ShowTraceBack;post:HandleTraceBack")
 }
 
 //  过滤函数

@@ -18,6 +18,7 @@ import (
 	//"strconv"
 	//"time"
 	"errors"
+	"github.com/hyperledger/fabric-chaincode-go/shim"
 )
 
 // ArticleController 自定义控制器
@@ -459,7 +460,7 @@ func (a *ArticleController) ShowUpdate() {
 	a.TplName = "update.html"
 }
 
-// 产权转让业务处理
+// HandleUpdate 产权转让业务处理
 func (a *ArticleController) HandleUpdate() {
 	//获得当前用户编号
 	accountId := a.Ctx.GetCookie("accountid")
@@ -521,7 +522,7 @@ func (a *ArticleController) ShowEdit() {
 	a.TplName = "edit.html"
 }
 
-// 产权信息编辑处理
+// HandleEdit 产权信息编辑处理
 func (a *ArticleController) HandleEdit() {
 	//获得当前用户编号
 	accountId := a.Ctx.GetCookie("accountid")
@@ -561,7 +562,7 @@ func (a *ArticleController) HandleEdit() {
 	a.Redirect("/article/index", 302)
 }
 
-//展示删除产权界面
+//ShowDelete 展示删除产权界面
 func (a *ArticleController) ShowDelete() {
 	a.Data["username"] = a.GetSession("username")
 	a.Data["accountid"] = a.GetSession("accountid")
@@ -611,6 +612,65 @@ func (a *ArticleController) HandleDelete() {
 
 	// 5.跳转列表页
 	a.Redirect("/article/index", 302)
+}
+
+// ShowTraceBack 产权追溯业务处理
+func (a *ArticleController) ShowTraceBack() {
+	a.Data["username"] = a.GetSession("username")
+	a.Data["accountid"] = a.GetSession("accountid")
+	a.TplName = "traceback.html"
+}
+
+// HandleTraceBack 展示产权追溯内容
+func (a *ArticleController) HandleTraceBack() {
+	//如果contract还未初始化，先初始化contract
+	if contract == nil{
+		getContract()
+	}
+
+	// 获取文章id
+	artid := a.GetString("artid")
+
+	result, err := contract.EvaluateTransaction("getHistoryOfCar", artid)
+	if err != nil {
+		fmt.Printf("Failed to evaluate transaction: %s\n", err)
+		os.Exit(1)
+	}
+
+	//得出result中的数据数量
+	queryResults := new([200]QueryResult)
+	json.Unmarshal(result, queryResults)
+	var count int
+	for i:=0; i<200; i++ {
+		if(queryResults[i].Record != nil) {
+			count++
+		};
+	}
+	//遍历queryResults装载articles
+	var articles []models.Article
+	for i:=0; i<count; i++ {
+		art := queryResults[i].Record
+		var article models.Article
+		article.ArtID = queryResults[i].Key
+		article.Title = art.Title
+		article.IpfsAddress = art.IpfsAddress
+		article.OwnerAccountId = art.OwnerAccountId
+		article.LastOwnerAccountId = art.LastOwnerAccountId
+		article.AcquireDate = art.AcquireDate
+		article.OwnerName = art.OwnerName
+		article.OwnerCardNumber = art.OwnerCardNumber
+		articles = append(articles, article)
+	}
+
+	a.Data["username"] = a.GetSession("username")
+	a.Data["accountid"] = a.GetSession("accountid")
+	a.Data["count"] = 1
+	a.Data["pageCount"] = 1
+	a.Data["pageIndex"] = 1
+	a.Data["isFirstPage"] = true
+	a.Data["isLastPage"] = false
+	a.Data["articles"] = articles
+	a.TplName = "traceback.html"
 }
 
 //ShowArtType 展示文章类型
