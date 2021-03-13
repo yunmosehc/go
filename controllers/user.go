@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fabcar/models"
+	"fmt"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -63,9 +64,6 @@ func (u *UserController) ShowLogin() {
 	u.TplName = "login.html"
 	// 获取cookie，如果有，显示用户名，没有就显示空
 	userName := u.Ctx.GetCookie("username")
-	beego.Info(">>>>>>>>>>>>>>>>>>>>")
-	beego.Info(userName)
-	beego.Info(">>>>>>>>>>>>>>>>>>>>")
 	//fmt.Println(userName)
 	//decName,_ := base64.StdEncoding.DecodeString(userName)
 	if userName != "" {
@@ -111,6 +109,7 @@ func (u *UserController) HandleLogin() {
 	if remember == "on" {
 		// key value  存活时间
 		u.Ctx.SetCookie("username", userName, 3600)
+		u.Ctx.SetCookie("accountid", fmt.Sprintf("%07d", user.AccountId), 3600)
 		u.Data["checkStatus"] = "checked"
 	} else {
 		// 设置存活时间为-1，不保存cookie
