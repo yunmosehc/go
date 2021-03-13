@@ -90,6 +90,14 @@ func getContract(){
 	contract = network.GetContract("fabcar")
 }
 
+func getCookieHandler(w http.ResponseWriter, r *http.Request) {
+	c1, err := r.Cookie("accountid")
+	if err != nil{
+		beego.Info(w, "Cannot get cookie")
+	}
+	beego.Info(c1.Value)
+}
+
 // ShowIndex 展示首页并实现分页功能
 func (a *ArticleController) ShowIndex() {
 	//// 1.查询所有文章数据
@@ -237,10 +245,12 @@ func (a *ArticleController) ShowIndex() {
 
 	a.Data["username"] = a.GetSession("username")
 	a.Data["accountid"] = a.GetSession("accountid")
-	cookie:= http.Request.Cookies("accountid")
-	beego.Info("******************")
-	beego.Info(cookie)
-	beego.Info("******************")
+
+	var r *http.Request
+	c1, err := r.Cookie("accountid")
+	beego.Info("********************")
+	beego.Info(c1.Domain)
+	beego.Info("********************")
 
 	a.Data["count"] = 1
 	a.Data["pageCount"] = 1
