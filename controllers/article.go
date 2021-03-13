@@ -546,7 +546,7 @@ func (a *ArticleController) HandleEdit() {
 	if err != nil {
 		fmt.Printf("Failed to submit transaction: %s\n", err)
 		beego.Info("该文章编号不存在！")
-		a.Redirect("/article/delete", 302)
+		a.Redirect("/article/edit", 302)
 		os.Exit(1)
 	}
 	//判断是否有操作权限
@@ -555,16 +555,17 @@ func (a *ArticleController) HandleEdit() {
 	accountId := a.GetString("accountid")
 	if car.OwnerAccountId != accountId {
 		beego.Info("您无法删除不属于您的文章！")
-		a.Redirect("/article/update", 302)
+		a.Redirect("/article/edit", 302)
 		return
 	}
 
 	// 3.更新文章产权信息
-	_, err = contract.SubmitTransaction("changeCarOwner", artId, newOwnerName, newOwnerCardNumber)
+	_, err = contract.SubmitTransaction("changeCarOwner", artId, car.OwnerAccountId, car.LastOwnerAccountId, car.AcquireDate,
+		newOwnerName, newOwnerCardNumber)
 	if err != nil {
 		fmt.Printf("Failed to submit transaction: %s\n", err)
 		beego.Info("changeCarOwner交易执行失败")
-		a.Redirect("/article/update", 302)
+		a.Redirect("/article/edit", 302)
 		os.Exit(1)
 	}
 	a.Redirect("/article/index?accountid="+a.GetString("accountid"), 302)
