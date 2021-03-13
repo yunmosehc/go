@@ -219,6 +219,10 @@ func (a *ArticleController) ShowIndex() {
 	var articles []models.Article
 	for i:=0; i<count; i++ {
 		art := queryResults[i].Record
+		beego.Info("#############")
+		beego.Info(art.OwnerAccountId)
+		beego.Info(accountId)
+		beego.Info("#############")
 		if art.OwnerAccountId == accountId {
 			var article models.Article
 			article.ArtID = queryResults[i].Key
