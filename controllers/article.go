@@ -665,11 +665,11 @@ func (a *ArticleController) HandleTraceBack() {
 
 	a.Data["username"] = a.GetSession("username")
 	a.Data["accountid"] = a.GetSession("accountid")
-	a.Data["count"] = 1
-	a.Data["pageCount"] = 1
-	a.Data["pageIndex"] = 1
-	a.Data["isFirstPage"] = true
-	a.Data["isLastPage"] = false
+	//a.Data["count"] = 1
+	//a.Data["pageCount"] = 1
+	//a.Data["pageIndex"] = 1
+	//a.Data["isFirstPage"] = true
+	//a.Data["isLastPage"] = false
 	a.Data["articles"] = articles
 	a.TplName = "traceback.html"
 }
