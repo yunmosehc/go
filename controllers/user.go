@@ -3,8 +3,6 @@ package controllers
 import (
 	"fabcar/models"
 	"fmt"
-	"strconv"
-
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
 )
@@ -118,12 +116,10 @@ func (u *UserController) HandleLogin() {
 	}
 	// 4.3 设置session，用于用户名相关操作
 	u.SetSession("username", userName)
-	u.SetSession("accountid", user.AccountId)
+	u.SetSession("accountid", fmt.Sprintf("%07d", user.AccountId))
 
 	// 5.跳转指定界面
-	beego.Info("when login, accountid is :")
-	beego.Info(user.AccountId)
-	u.Redirect("/article/index?accountid="+strconv.Itoa(user.AccountId), 302)
+	u.Redirect("/article/index", 302)
 }
 
 // LogOut 退出实现

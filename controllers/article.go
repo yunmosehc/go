@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
-	"net/http"
 	"strconv"
 	"time"
 
@@ -90,12 +89,48 @@ func getContract(){
 	contract = network.GetContract("fabcar")
 }
 
-func getCookieHandler(w http.ResponseWriter, r *http.Request) {
-	c1, err := r.Cookie("accountid")
-	if err != nil{
-		beego.Info(w, "Cannot get cookie")
+func populateWallet(wallet *gateway.Wallet) error {
+	credPath := filepath.Join(
+		"..",
+		"..",
+		"test-network",
+		"organizations",
+		"peerOrganizations",
+		"org1.example.com",
+		"users",
+		"User1@org1.example.com",
+		"msp",
+	)
+
+	certPath := filepath.Join(credPath, "signcerts", "cert.pem")
+	// read the certificate pem
+	cert, err := ioutil.ReadFile(filepath.Clean(certPath))
+	if err != nil {
+		return err
 	}
-	beego.Info(c1.Value)
+
+	keyDir := filepath.Join(credPath, "keystore")
+	// there's a single file in this dir containing the private key
+	files, err := ioutil.ReadDir(keyDir)
+	if err != nil {
+		return err
+	}
+	if len(files) != 1 {
+		return errors.New("keystore folder should have contain one file")
+	}
+	keyPath := filepath.Join(keyDir, files[0].Name())
+	key, err := ioutil.ReadFile(filepath.Clean(keyPath))
+	if err != nil {
+		return err
+	}
+
+	identity := gateway.NewX509Identity("Org1MSP", string(cert), string(key))
+
+	err = wallet.Put("appUser", identity)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // ShowIndex 展示首页并实现分页功能
@@ -219,10 +254,6 @@ func (a *ArticleController) ShowIndex() {
 	var articles []models.Article
 	for i:=0; i<count; i++ {
 		art := queryResults[i].Record
-		beego.Info("#############")
-		beego.Info(art.OwnerAccountId)
-		beego.Info(accountId)
-		beego.Info("#############")
 		if art.OwnerAccountId == accountId {
 			var article models.Article
 			article.ArtID = queryResults[i].Key
@@ -263,50 +294,6 @@ func (a *ArticleController) ShowIndex() {
 	a.TplName = "index.html"
 }
 
-func populateWallet(wallet *gateway.Wallet) error {
-	credPath := filepath.Join(
-		"..",
-		"..",
-		"test-network",
-		"organizations",
-		"peerOrganizations",
-		"org1.example.com",
-		"users",
-		"User1@org1.example.com",
-		"msp",
-	)
-
-	certPath := filepath.Join(credPath, "signcerts", "cert.pem")
-	// read the certificate pem
-	cert, err := ioutil.ReadFile(filepath.Clean(certPath))
-	if err != nil {
-		return err
-	}
-
-	keyDir := filepath.Join(credPath, "keystore")
-	// there's a single file in this dir containing the private key
-	files, err := ioutil.ReadDir(keyDir)
-	if err != nil {
-		return err
-	}
-	if len(files) != 1 {
-		return errors.New("keystore folder should have contain one file")
-	}
-	keyPath := filepath.Join(keyDir, files[0].Name())
-	key, err := ioutil.ReadFile(filepath.Clean(keyPath))
-	if err != nil {
-		return err
-	}
-
-	identity := gateway.NewX509Identity("Org1MSP", string(cert), string(key))
-
-	err = wallet.Put("appUser", identity)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 // ShowAdd 展示添加文章界面
 func (a *ArticleController) ShowAdd() {
 	// 展示下拉类型
@@ -334,13 +321,16 @@ func (a *ArticleController) HandleAdd() {
 	//artContent := a.GetString("artcontent")
 	//typeName := a.GetString("select")
 
+	//获得当前用户编号
+	accountId := a.Ctx.GetCookie("accountid")
+
 	//获取提交的数据
 	title := a.GetString("title")
 	ipfsaddress := a.GetString("ipfsaddress")
 	//当前用户id
-	accountid, err2 := a.GetInt("accountid")
-	if err2 != nil {
-	}
+	//accountid, err2 := a.GetInt("accountid")
+	//if err2 != nil {
+	//}
 	//当前时间
 	t := time.Now()
 	time_now :=fmt.Sprintf("%4d.%02d.%02d %02d:%02d:%02d(%02d)\n",t.Year(),t.Month(),t.Day(),t.Hour(),t.Minute(),t.Second(),t.Nanosecond())
@@ -418,7 +408,7 @@ func (a *ArticleController) HandleAdd() {
 	}
 
 	_, err := contract.SubmitTransaction("createCar", title,
-		ipfsaddress, strconv.Itoa(accountid), "0000",time_now, ownername, ownercardnumber)
+		ipfsaddress, accountId, "0000",time_now, ownername, ownercardnumber)
 	if err != nil {
 		fmt.Printf("Failed to submit transaction: %s\n", err)
 		os.Exit(1)
@@ -434,31 +424,9 @@ func (a *ArticleController) HandleAdd() {
 	//}
 	// 5.跳转页面（index.html）
 	//a.Redirect("/article/index", 302)
-	a.Redirect("/article/index?accountid="+a.GetString("accountid"), 302)
+	a.Redirect("/article/index", 302)
 	//a.TplName = "index.html"
 }
-
-//ShowContent 展示详情页面
-//func (a *ArticleController) ShowContent() {
-//	// 1.获取文章id
-//	sid := a.GetString("id")
-//	id, _ := strconv.Atoi(sid)
-//	fmt.Println(id)
-//	// 2.通过id查询数据库信息
-//	o := orm.NewOrm()
-//	article := models.Article{ArtID: id}
-//	err := o.Read(&article)
-//	if err != nil {
-//		beego.Info("failed~")
-//		a.Redirect("/article/index", 302)
-//		return
-//	}
-//	// 3.将数据传给视图
-//	a.Data["username"] = a.GetSession("username")
-//	a.Data["article"] = article
-//	// 4.跳转页面
-//	a.TplName = "content.html"
-//}
 
 // ShowUpdate 展示产权转让页面
 func (a *ArticleController) ShowUpdate() {
@@ -493,10 +461,13 @@ func (a *ArticleController) ShowUpdate() {
 
 // 产权转让业务处理
 func (a *ArticleController) HandleUpdate() {
+	//获得当前用户编号
+	accountId := a.Ctx.GetCookie("accountid")
+
 	// 1.获取页面数据
 	artId := a.GetString("artid")
 	newOwnerAccountId := a.GetString("newaccountid")
-	lastOwnerAccountId := a.GetString("accountid")
+	lastOwnerAccountId := accountId
 	t := time.Now()
 	time_now :=fmt.Sprintf("%4d.%02d.%02d %02d:%02d:%02d(%02d)\n",t.Year(),t.Month(),t.Day(),t.Hour(),t.Minute(),t.Second(),t.Nanosecond())
 	newOwnerName := a.GetString("newownername")
@@ -509,13 +480,12 @@ func (a *ArticleController) HandleUpdate() {
 	if err != nil {
 		fmt.Printf("Failed to submit transaction: %s\n", err)
 		beego.Info("该文章编号不存在！")
-		a.Redirect("/article/delete", 302)
+		a.Redirect("/article/update", 302)
 		os.Exit(1)
 	}
 	//判断是否有操作权限
 	car := new(Car)
 	json.Unmarshal(result, car)
-	accountId := a.GetString("accountid")
 	if car.OwnerAccountId != accountId {
 		beego.Info("您无法删除不属于您的文章！")
 		a.Redirect("/article/update", 302)
@@ -541,7 +511,7 @@ func (a *ArticleController) HandleUpdate() {
 		a.Redirect("/article/update", 302)
 		os.Exit(1)
 	}
-	a.Redirect("/article/index?accountid="+a.GetString("accountid"), 302)
+	a.Redirect("/article/index", 302)
 }
 
 // ShowEdit 展示产权信息编辑页面
@@ -553,6 +523,9 @@ func (a *ArticleController) ShowEdit() {
 
 // 产权信息编辑处理
 func (a *ArticleController) HandleEdit() {
+	//获得当前用户编号
+	accountId := a.Ctx.GetCookie("accountid")
+
 	// 1.获取页面数据
 	artId := a.GetString("artid")
 	newOwnerName := a.GetString("newownername")
@@ -570,9 +543,8 @@ func (a *ArticleController) HandleEdit() {
 	//判断是否有操作权限
 	car := new(Car)
 	json.Unmarshal(result, car)
-	accountId := a.GetString("accountid")
 	if car.OwnerAccountId != accountId {
-		beego.Info("您无法删除不属于您的文章！")
+		beego.Info("您无法编辑不属于您的文章！")
 		a.Redirect("/article/edit", 302)
 		return
 	}
@@ -586,7 +558,7 @@ func (a *ArticleController) HandleEdit() {
 		a.Redirect("/article/edit", 302)
 		os.Exit(1)
 	}
-	a.Redirect("/article/index?accountid="+a.GetString("accountid"), 302)
+	a.Redirect("/article/index", 302)
 }
 
 //展示删除产权界面
@@ -598,6 +570,9 @@ func (a *ArticleController) ShowDelete() {
 
 // Delete 删除业务处理
 func (a *ArticleController) HandleDelete() {
+	//获得当前用户编号
+	accountId := a.Ctx.GetCookie("accountid")
+
 	// 1.获取文章id
 	artid := a.GetString("artid")
 	// 2.查询出对应数据
@@ -613,7 +588,6 @@ func (a *ArticleController) HandleDelete() {
 	// 判断操作者是否是产权人
 	car := new(Car)
 	json.Unmarshal(result, car)
-	accountId := a.GetString("accountid")
 	if car.OwnerAccountId != accountId {
 		beego.Info("您无法删除不属于您的文章！")
 		a.Redirect("/article/delete", 302)
@@ -636,7 +610,7 @@ func (a *ArticleController) HandleDelete() {
 	}
 
 	// 5.跳转列表页
-	a.Redirect("/article/index?accountid="+a.GetString("accountid"), 302)
+	a.Redirect("/article/index", 302)
 }
 
 //ShowArtType 展示文章类型
