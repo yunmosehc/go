@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -236,6 +237,11 @@ func (a *ArticleController) ShowIndex() {
 
 	a.Data["username"] = a.GetSession("username")
 	a.Data["accountid"] = a.GetSession("accountid")
+	cookie:= http.Request.Cookies("accountid")
+	beego.Info("******************")
+	beego.Info(cookie)
+	beego.Info("******************")
+
 	a.Data["count"] = 1
 	a.Data["pageCount"] = 1
 	a.Data["pageIndex"] = 1
