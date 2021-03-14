@@ -47,6 +47,7 @@
                 <div class="form_group">
                     <label>文章编号：</label>
                     <input type="text" class="input_txt3" name="artid" required>
+                    &nbsp;&nbsp;
                     <input type="submit" value="追 溯" class="confirm">
                 </div>
 {{/*                <div class="form_group indent_group line_top">*/}}
@@ -61,8 +62,8 @@
                 <tr>
                     <th width="25%">文章标题</th>
                     <th width="10%">产权人账号</th>
-                    <th width="10%">上一位产权人</th>
-                    <th width="15%">获得产权日期</th>
+{{/*                    <th width="10%">上一位产权人</th>*/}}
+                    <th width="25%">获得产权日期</th>
                     <th width="10%">产权人姓名</th>
                     <th width="10%">IPFS原文地址</th>
                     <th width="18%">产权人身份证号</th>
@@ -72,7 +73,7 @@
 {{/*                    <td>{{.ArtID}}</td>*/}}
                     <td>{{.Title}}</td>
                     <td>{{.OwnerAccountId}}</td>
-                    <td>{{.LastOwnerAccountId}}</td>
+{{/*                    <td>{{.LastOwnerAccountId}}</td>*/}}
                     <td>{{.AcquireDate}}</td>
                     <td>{{.OwnerName}}</td>
                     <td><a href="{{.IpfsAddress}}">查看原文</a></td>
