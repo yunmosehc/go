@@ -647,6 +647,10 @@ func (a *ArticleController) HandleTraceBack() {
 			count++
 		};
 	}
+
+	beego.Info("count is : ")
+	beego.Info(count)
+
 	//遍历queryResults装载articles
 	var articles []models.Article
 	for i:=0; i<count; i++ {
@@ -659,6 +663,10 @@ func (a *ArticleController) HandleTraceBack() {
 		article.LastOwnerAccountId = art.LastOwnerAccountId
 		article.AcquireDate = art.AcquireDate
 		article.OwnerName = art.OwnerName
+
+		beego.Info("OwnerName : ")
+		beego.Info(art.OwnerName)
+
 		article.OwnerCardNumber = art.OwnerCardNumber
 		articles = append(articles, article)
 	}
