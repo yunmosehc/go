@@ -617,13 +617,11 @@ func (a *ArticleController) HandleDelete() {
 func (a *ArticleController) ShowTraceBack() {
 	a.Data["username"] = a.GetSession("username")
 	a.Data["accountid"] = a.GetSession("accountid")
-	beego.Info("------------------>>>>>>>>>>>>>ShowTraceBack")
 	a.TplName = "traceback.html"
 }
 
 // HandleTraceBack 展示产权追溯内容
 func (a *ArticleController) HandleTraceBack() {
-	beego.Info("------------------>>>>>>>>>>>>>HandleTraceBack")
 	//如果contract还未初始化，先初始化contract
 	if contract == nil{
 		getContract()
@@ -663,10 +661,6 @@ func (a *ArticleController) HandleTraceBack() {
 		article.LastOwnerAccountId = art.LastOwnerAccountId
 		article.AcquireDate = art.AcquireDate
 		article.OwnerName = art.OwnerName
-
-		beego.Info("OwnerName : ")
-		beego.Info(art.OwnerName)
-
 		article.OwnerCardNumber = art.OwnerCardNumber
 		articles = append(articles, article)
 	}
