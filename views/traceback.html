@@ -43,6 +43,18 @@
             当前位置：文章管理>产权追溯
         </div>
         <div class="pannel">
+            <form method="post" action="/article/traceback" enctype="multipart/form-data">
+                <div class="form_group">
+                    <label>文章编号：</label>
+                    <input type="text" class="input_txt2" name="artid" >
+                </div>
+                <div class="form_group indent_group line_top">
+                    <input type="submit" value="追 溯" class="confirm">
+                    <span>{{.errMsg}}</span>
+                </div>
+            </form>
+        </div>
+        <div class="pannel">
             {{.code}}
             <table class="common_table">
                 <tr>
@@ -86,17 +98,6 @@
 {{/*                <li><button onclick="last()"> >> </button></li>*/}}
 {{/*            </ul>*/}}
         </div>
-        <div class="pannel">
-            <form method="post" action="/article/traceback" enctype="multipart/form-data">
-                <div class="form_group">
-                    <label>文章编号：</label>
-                    <input type="text" class="input_txt2" name="artid" >
-                </div>
-                <div class="form_group indent_group line_top">
-                    <input type="submit" value="追 溯" class="confirm">
-                    <span>{{.errMsg}}</span>
-                </div>
-            </form>
-        </div>
+
     </div>
 {{end}}
