@@ -470,6 +470,16 @@ body{
 	box-sizing:border-box;
 }
 
+.confirm4{
+	width:8%;
+	height:30px;
+	border-radius:4px;
+	color:#fff;
+	background:#25c192;
+	border:0px;
+	outline:none;
+}
+
 .form_group .input_area,.form_group .input_multxt{
 	width:86%;
 	height:300px;
