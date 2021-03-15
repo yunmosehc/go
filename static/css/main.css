@@ -473,6 +473,7 @@ body{
 .confirm4{
 	width:8%;
 	height:30px;
+	float:left;
 	border-radius:4px;
 	color:#fff;
 	background:#25c192;
