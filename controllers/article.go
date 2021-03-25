@@ -18,6 +18,8 @@ import (
 	//"strconv"
 	//"time"
 	"errors"
+	"path"
+	"github.com/ipfs/go-ipfs-api"
 )
 
 // ArticleController 自定义控制器
@@ -326,7 +328,8 @@ func (a *ArticleController) HandleAdd() {
 
 	//获取提交的数据
 	title := a.GetString("title")
-	ipfsaddress := a.GetString("ipfsaddress")
+	ipfsaddress := ""
+	//ipfsaddress := a.GetString("ipfsaddress")
 	//当前用户id
 	//accountid, err2 := a.GetInt("accountid")
 	//if err2 != nil {
@@ -348,66 +351,50 @@ func (a *ArticleController) HandleAdd() {
 	//	beego.Info("accountId字符串转整数失败")
 	//}
 
-	//// 2.校验数据（是否为空）
-	//if title == "" || ipfsaddress == "" || ownername == "" || ownercardnumber == "" {
-	//	beego.Info("数据不能为空")
-	//	a.Redirect("/article/add", 302)
-	//	return
-	//}
-	//// 3.校验文件
-	////file, head, err := a.GetFile("artfile")
-	////if file != nil {
-	////	defer file.Close()
-	////	if err != nil {
-	////		beego.Info("上传文件失败")
-	////		a.Redirect("/article/add", 302)
-	////		return
-	////	}
-	////	// 3.1限制文件的格式.jpg/.png/.gif
-	////	ext := path.Ext(head.Filename) //获取文件拓展名
-	////	if ext != ".jpg" && ext != ".png" && ext != ".gif" {
-	////		beego.Info("文件格式不正确！")
-	////		a.Redirect("/article/add", 302)
-	////		return
-	////	}
-	////	// 3.2限制文件大小
-	////	if head.Size > 20<<20 {
-	////		beego.Info("文件不能大于20M")
-	////		a.Redirect("/article/add", 302)
-	////		return
-	////	}
-	////	//3.3给文件重命名
-	////	unix := time.Now().Format("20060102_150405") + ext
-	////	_ = a.SaveToFile("artfile", "./static/img/"+unix) //注意文件路径./开头
-	////	filePath = "/static/img/" + unix
-	////}
-	//// 4.将数据插入数据库
-	//o := orm.NewOrm()
-	////aType := models.ArticleType{TypeName: typeName} //初始化一个ArticleType对象
-	////err = o.Read(&aType, "TypeName")
-	////if err != nil {
-	////	beego.Info("获取文章类型失败")
-	////	a.Redirect("/article/index", 302)
-	////	return
-	////}
-	////art := models.Article{ArtName: artName, ArtContent: artContent, ArtImg: filePath, ArtType: &aType}
-	//
-	//art := models.Article{
-	//	Title:              title,
-	//	IpfsAddress:        ipfsaddress,
-	//	OwnerAccountId:     accountid,
-	//	LastOwnerAccountId: 0,
-	//	AcquireDate:        time.Time{},
-	//	OwnerName:          ownername,
-	//	OwnerCardNumber:    ownercardnumber,
-	//}
+	// 3.校验文件
+	file, head, err := a.GetFile("artfile")
+	if file != nil {
+		defer file.Close()
+		if err != nil {
+			beego.Info("未选择文件")
+			a.Redirect("/article/add", 302)
+			return
+		}
+		// 3.1限制文件的格式.jpg/.png/.gif
+		ext := path.Ext(head.Filename) //获取文件拓展名
+		if ext != ".pdf" {
+			beego.Info("请上传PDF文件！")
+			a.Redirect("/article/add", 302)
+			return
+		}
+		// 3.2限制文件大小
+		if head.Size > 20<<20 {
+			beego.Info("文件不能大于20M")
+			a.Redirect("/article/add", 302)
+			return
+		}
+		//3.3给文件重命名
+		//unix := time.Now().Format("20060102_150405") + ext
+		//_ = a.SaveToFile("artfile", "./static/img/"+unix) //注意文件路径./开头
+		//filePath = "/static/img/" + unix
+
+		sh := shell.NewShell("localhost:5001")
+		cid, err := sh.Add(file)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %s", err)
+			os.Exit(1)
+		}
+		//fmt.Printf("added %s", cid)
+		ipfsaddress = "http://192.168.1.6:8080/ipfs/"+cid
+	}
+
 
 	//如果contract还未初始化，先初始化contract
 	if contract == nil{
 		getContract()
 	}
 
-	_, err := contract.SubmitTransaction("createCar", title,
+	_, err = contract.SubmitTransaction("createCar", title,
 		ipfsaddress, accountId, "0000",time_now, ownername, ownercardnumber)
 	if err != nil {
 		fmt.Printf("Failed to submit transaction: %s\n", err)
