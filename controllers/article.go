@@ -385,7 +385,7 @@ func (a *ArticleController) HandleAdd() {
 			os.Exit(1)
 		}
 		//fmt.Printf("added %s", cid)
-		ipfsaddress = "http://192.168.1.10:8080/ipfs/"+cid
+		ipfsaddress = "http://192.168.1.7:8080/ipfs/"+cid
 	}
 
 
